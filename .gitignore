@@ -11,10 +11,6 @@ __pycache__/
 
 # Build outputs
 /build
-frontend/build/
-
-# Electron build cache
-desktop/build/
 
 # Environment / secrets
 .env
