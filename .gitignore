@@ -12,8 +12,6 @@ __pycache__/
 # Build outputs
 /build
 frontend/build/
-dist/
-desktop/dist/
 
 # Electron build cache
 desktop/build/
@@ -40,9 +38,6 @@ yarn-debug.log*
 *.sqlite3-shm
 *.sqlite3-wal
 backend/tmp-source-data/
-
-# Large binary assets (Windows exe — rebuild on Windows)
-desktop/backend-dist/*.exe
 
 # Test / cache
 .cache/
