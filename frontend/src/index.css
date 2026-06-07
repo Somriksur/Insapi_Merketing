@@ -1,0 +1,190 @@
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/500.css';
+@import '@fontsource/outfit/700.css';
+@import '@fontsource/outfit/800.css';
+@import '@fontsource/manrope/400.css';
+@import '@fontsource/manrope/500.css';
+@import '@fontsource/manrope/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg-page: #050505;
+    --bg-surface: #0F0F0F;
+    --bg-surface-2: #141414;
+    --bg-surface-hover: #1A1A1A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A1A1AA;
+    --text-tertiary: #71717A;
+    --brand: #1D4ED8;
+    --brand-hover: #2563EB;
+    --brand-muted: rgba(29, 78, 216, 0.18);
+    --border: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.20);
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+}
+
+[data-theme="light"] {
+    --bg-page: #FAFAF7;
+    --bg-surface: #FFFFFF;
+    --bg-surface-2: #F5F5F2;
+    --bg-surface-hover: #F0F0EC;
+    --text-primary: #0B0B0B;
+    --text-secondary: #4B5563;
+    --text-tertiary: #9CA3AF;
+    --brand: #1D4ED8;
+    --brand-hover: #1E40AF;
+    --brand-muted: rgba(29, 78, 216, 0.10);
+    --border: rgba(0, 0, 0, 0.10);
+    --border-strong: rgba(0, 0, 0, 0.20);
+    --success: #059669;
+    --warning: #D97706;
+    --error: #DC2626;
+}
+
+@layer base {
+    :root {
+        --background: 0 0% 2%;
+        --foreground: 0 0% 100%;
+        --card: 0 0% 6%;
+        --card-foreground: 0 0% 100%;
+        --popover: 0 0% 6%;
+        --popover-foreground: 0 0% 100%;
+        --primary: 222 84% 48%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 0 0% 10%;
+        --muted-foreground: 0 0% 64%;
+        --accent: 0 0% 12%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 84% 60%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 0 0% 16%;
+        --input: 0 0% 12%;
+        --ring: 222 84% 48%;
+        --radius: 0px;
+    }
+
+    [data-theme="light"] {
+        --background: 60 11% 97%;
+        --foreground: 0 0% 4%;
+        --card: 0 0% 100%;
+        --card-foreground: 0 0% 4%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 0 0% 4%;
+        --primary: 222 84% 48%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 60 5% 95%;
+        --secondary-foreground: 0 0% 4%;
+        --muted: 60 5% 95%;
+        --muted-foreground: 220 9% 46%;
+        --accent: 60 5% 92%;
+        --accent-foreground: 0 0% 4%;
+        --destructive: 0 84% 50%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 0 0% 88%;
+        --input: 0 0% 90%;
+        --ring: 222 84% 48%;
+    }
+}
+
+* {
+    border-color: hsl(var(--border));
+}
+
+html, body, #root {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Manrope', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "ss02";
+}
+
+.font-display {
+    font-family: 'Outfit', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+}
+
+.font-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.label-tiny {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.surface {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+}
+
+.surface-2 {
+    background: var(--bg-surface-2);
+    border: 1px solid var(--border);
+}
+
+.hover-surface:hover {
+    background: var(--bg-surface-hover);
+}
+
+.brand-text { color: var(--brand); }
+.brand-bg { background: var(--brand); }
+.brand-border { border-color: var(--brand); }
+
+.scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scroll-thin::-webkit-scrollbar-track { background: transparent; }
+.scroll-thin::-webkit-scrollbar-thumb { background: var(--border-strong); }
+
+.grid-bg {
+    background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+}
+
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-rise {
+    animation: fade-in-up 0.4s ease-out both;
+}
+
+.kanban-col {
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+.drop-target {
+    background: var(--brand-muted);
+    outline: 1px dashed var(--brand);
+}
+
+/* shadcn overrides for editorial feel */
+.btn-square { border-radius: 0 !important; }
+
+@layer base {
+    [data-debug-wrapper="true"] { display: contents !important; }
+}

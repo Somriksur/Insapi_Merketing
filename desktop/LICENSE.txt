@@ -1,0 +1,61 @@
+END USER LICENSE AGREEMENT (EULA)
+Insapi Marketing Workspace
+
+Copyright 2026 Insapi Marketing. All rights reserved.
+
+IMPORTANT - READ CAREFULLY: This End User License Agreement ("EULA") is a legal 
+agreement between you (either an individual or a single entity) and Insapi Marketing 
+for the software product identified above, which includes computer software and may 
+include associated media, printed materials, and "online" or electronic documentation 
+("SOFTWARE PRODUCT").
+
+By installing, copying, or otherwise using the SOFTWARE PRODUCT, you agree to be 
+bound by the terms of this EULA. If you do not agree to the terms of this EULA, 
+do not install or use the SOFTWARE PRODUCT.
+
+1. GRANT OF LICENSE
+Insapi Marketing grants you the following rights:
+- Installation and Use: You may install and use the SOFTWARE PRODUCT on a single 
+  computer or device.
+- Backup Copy: You may make one backup copy of the SOFTWARE PRODUCT for archival 
+  purposes.
+
+2. DESCRIPTION OF OTHER RIGHTS AND LIMITATIONS
+- You may not reverse engineer, decompile, or disassemble the SOFTWARE PRODUCT.
+- You may not rent, lease, or lend the SOFTWARE PRODUCT.
+- You may not use the SOFTWARE PRODUCT for any illegal purpose.
+
+3. COPYRIGHT
+All title and copyrights in and to the SOFTWARE PRODUCT (including but not limited 
+to any images, photographs, animations, video, audio, music, text, and "applets" 
+incorporated into the SOFTWARE PRODUCT) are owned by Insapi Marketing.
+
+4. NO WARRANTIES
+The SOFTWARE PRODUCT is provided "AS IS" without warranty of any kind. Insapi 
+Marketing disclaims all warranties, either express or implied, including but not 
+limited to implied warranties of merchantability and fitness for a particular purpose.
+
+5. LIMITATION OF LIABILITY
+In no event shall Insapi Marketing be liable for any damages whatsoever (including, 
+without limitation, damages for loss of business profits, business interruption, 
+loss of business information, or any other pecuniary loss) arising out of the use 
+of or inability to use this SOFTWARE PRODUCT.
+
+6. DATA PRIVACY
+The SOFTWARE PRODUCT stores all data locally on your device. No data is transmitted 
+to external servers. You are responsible for backing up your data.
+
+7. TERMINATION
+Without prejudice to any other rights, Insapi Marketing may terminate this EULA if 
+you fail to comply with the terms and conditions of this EULA.
+
+8. SUPPORT
+For technical support, please visit: https://insapimarketing.com/support
+For general inquiries: support@insapimarketing.com
+
+By clicking "I Agree" or by installing the SOFTWARE PRODUCT, you acknowledge that 
+you have read this EULA, understand it, and agree to be bound by its terms and 
+conditions.
+
+Insapi Marketing
+Last Updated: May 25, 2026

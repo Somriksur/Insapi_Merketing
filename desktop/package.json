@@ -1,0 +1,87 @@
+{
+  "name": "insapi-marketing-workspace-desktop",
+  "version": "1.0.0",
+  "description": "Insapi Marketing Workspace - a local-first business workspace for creative freelancers.",
+  "main": "main.js",
+  "author": "Insapi Marketing",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:frontend": "cd ../frontend && yarn build && xcopy build ..\\desktop\\web /E /I /Y",
+    "build:win": "electron-builder --win --x64",
+    "build:portable": "electron-builder --win portable --x64",
+    "dist": "yarn build:frontend && yarn build:win"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-store": "^10.0.0"
+  },
+
+  
+  "build": {
+    "appId": "com.insapi.marketing.workspace",
+    "productName": "Insapi Marketing Workspace",
+    "copyright": "Copyright 2026 Insapi Marketing. All rights reserved.",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    
+    "files": [
+      "main.js",
+      "preload.js",
+      "web/**",
+      "backend-dist/**",
+      "assets/**",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "backend-dist", "to": "backend" }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "Insapi-Marketing-Workspace-Setup-${version}.${ext}",
+      "publisherName": "Insapi Marketing",
+      "verifyUpdateCodeSignature": false,
+      "requestedExecutionLevel": "highestAvailable",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "installerHeader": "assets/installer-header.bmp",
+      "installerSidebar": "assets/installer-sidebar.bmp",
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Insapi Marketing Workspace",
+      "include": "installer-simple.nsh",
+      "license": "LICENSE.txt",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "menuCategory": "Insapi Marketing",
+      "artifactName": "Insapi-Marketing-Workspace-Setup-${version}.${ext}",
+      "displayLanguageSelector": false,
+      "installerLanguages": ["en_US"],
+      "language": "1033",
+      "warningsAsErrors": false,
+      "perMachine": false
+    },
+    "portable": {
+      "artifactName": "Insapi-Marketing-Workspace-Portable-${version}.${ext}"
+    }
+  }
+}

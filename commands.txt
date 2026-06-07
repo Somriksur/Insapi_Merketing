@@ -1,0 +1,41 @@
+commands : 
+
+1: cd backend
+2: .venv\Scripts\activate 
+3: cd ../desktop        
+4: pyinstaller backend.spec --clean      ( // its generate the sewrver file in dist folder then need to replace and move into backend- dist folder ) 
+5: npm run dist                ( this will generate the installer file insapi marketing ) ( musat test in windows )
+
+
+
+Proiblems :
+
+1. There is anti virus detecting while installing the file for that modification needed. so it not look suspicious must addd proper certifications 
+
+2. in installer after approved means give admin access to the installer it closed after click it starts with agree again.
+
+3. installer must design and look professional.
+
+4. insapi marketing logo should be use in every where for branding from installer or shoprtcut on desktop to inside software.
+
+5. make sure after installing it must gvenerate a shortcut at desktop. and auto open after installing./
+
+6. in dashboard net profit should be month wise. and also expense also. in payment system also should be month wise and history must available and all over net profit or revenue must available on analytics dashboard
+
+7. while sending the involice to client PDF not attaching it should automatically attached.
+
+8. while sending invoice to client it mention the actual due or left payment instead of total due. 
+
+9. make sure a non python installer computer also must work this.
+
+10. Tech stack : Backend : FastAPI, Frontend : React, Database : SQLite.
+
+11. Expense also should be month wise calculate in dashboard.
+
+12. Make Sure App is fast. use multithreading concept here.
+
+13. Make Sure branding is always for Insapi Marketing.
+
+14. logo : https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png
+
+15. Project File : https://github.com/jyotirmoycrick/insapi_marketing/
