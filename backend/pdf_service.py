@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List
 
+import requests
+
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -18,6 +20,9 @@ LOGO_PATH = ASSETS / "logo.png"
 FONT_REG = ASSETS / "fonts" / "Inv-Regular.ttf"
 FONT_BOLD = ASSETS / "fonts" / "Inv-Bold.ttf"
 
+# Default logo URL as fallback
+DEFAULT_LOGO_URL = "https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png"
+
 BRAND = colors.HexColor("#1D4ED8")
 INK = colors.HexColor("#0B0B0B")
 GRAY_500 = colors.HexColor("#6B7280")
@@ -25,6 +30,30 @@ GRAY_700 = colors.HexColor("#374151")
 GRAY_400 = colors.HexColor("#9CA3AF")
 LINE = colors.HexColor("#E5E7EB")
 ROW_ALT = colors.HexColor("#FAFAFA")
+
+# Map of logo_filter → brand hex (mirrors frontend branding.js getLogoColor)
+_FILTER_COLORS = {
+    "blue":  "#1D4ED8",
+    "red":   "#DC2626",
+    "green": "#059669",
+}
+_DEFAULT_BRAND_HEX = "#1D4ED8"
+
+
+def _brand_color(org: Dict[str, Any]) -> "colors.HexColor":
+    """
+    Resolve the brand color from org settings so the PDF matches the app UI.
+    Priority: custom hex → preset filter color → default blue.
+    """
+    logo_filter = (org.get("logo_filter") or "none").lower()
+    if logo_filter == "custom":
+        custom = (org.get("logo_custom_color") or "").strip()
+        import re
+        if re.match(r"^#[0-9a-fA-F]{6}$", custom):
+            return colors.HexColor(custom)
+    if logo_filter in _FILTER_COLORS:
+        return colors.HexColor(_FILTER_COLORS[logo_filter])
+    return BRAND
 
 
 def _money(v) -> str:
@@ -41,7 +70,158 @@ def _money_full(v) -> str:
         return "\u20B90.00"
 
 
-# Register a Unicode-capable font so the rupee symbol renders.
+def _apply_color_filter(img_bytes: bytes, filter_type: str, custom_color: str = "") -> bytes:
+    """
+    Apply color filter to image bytes.
+    Supports: grayscale, blue, red, green, custom color overlay.
+    Returns filtered image bytes.
+    """
+    try:
+        from PIL import Image, ImageEnhance, ImageOps
+        
+        # Open image from bytes
+        img = Image.open(io.BytesIO(img_bytes))
+        
+        # Convert to RGBA if not already
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+        
+        if filter_type == "grayscale":
+            # Convert to grayscale but keep alpha channel
+            gray = ImageOps.grayscale(img.convert('RGB'))
+            gray_rgba = Image.new('RGBA', img.size)
+            gray_rgba.paste(gray)
+            gray_rgba.putalpha(img.split()[3] if img.mode == 'RGBA' else 255)
+            img = gray_rgba
+            
+        elif filter_type in ["blue", "red", "green"]:
+            # Apply color tint
+            r, g, b, a = img.split()
+            
+            if filter_type == "blue":
+                # Reduce red and green, keep blue
+                r = r.point(lambda x: int(x * 0.3))
+                g = g.point(lambda x: int(x * 0.5))
+            elif filter_type == "red":
+                # Keep red, reduce green and blue
+                g = g.point(lambda x: int(x * 0.3))
+                b = b.point(lambda x: int(x * 0.3))
+            elif filter_type == "green":
+                # Keep green, reduce red and blue
+                r = r.point(lambda x: int(x * 0.3))
+                b = b.point(lambda x: int(x * 0.5))
+            
+            img = Image.merge('RGBA', (r, g, b, a))
+            
+        elif filter_type == "custom" and custom_color:
+            # Apply custom color overlay
+            try:
+                # Parse hex color
+                color = custom_color.strip('#')
+                if len(color) == 6:
+                    overlay_r = int(color[0:2], 16)
+                    overlay_g = int(color[2:4], 16)
+                    overlay_b = int(color[4:6], 16)
+                    
+                    # Create color overlay
+                    overlay = Image.new('RGB', img.size, (overlay_r, overlay_g, overlay_b))
+                    
+                    # Blend with original (50% opacity)
+                    rgb = img.convert('RGB')
+                    blended = Image.blend(rgb, overlay, 0.3)
+                    
+                    # Restore alpha channel
+                    result = Image.new('RGBA', img.size)
+                    result.paste(blended)
+                    if img.mode == 'RGBA':
+                        result.putalpha(img.split()[3])
+                    img = result
+            except Exception:
+                pass
+        
+        # Save filtered image to bytes
+        output = io.BytesIO()
+        img.save(output, format='PNG')
+        return output.getvalue()
+        
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error applying color filter: {e}")
+        # Return original image if filter fails
+        return img_bytes
+
+
+def _load_logo_image(org: Dict[str, Any]) -> ImageReader | None:
+    """
+    Load logo image from URL or local file and apply color filter.
+    Priority: org.logo_url > local LOGO_PATH > DEFAULT_LOGO_URL
+    Returns ImageReader object or None if loading fails.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    img_bytes = None
+    source_name = None
+    
+    # Try org logo URL first
+    logo_url = org.get("logo_url", "").strip()
+    if logo_url:
+        try:
+            logger.info(f"Attempting to load logo from org.logo_url: {logo_url}")
+            response = requests.get(logo_url, timeout=10)
+            if response.status_code == 200:
+                img_bytes = response.content
+                source_name = logo_url
+                logger.info(f"Successfully loaded logo from URL: {logo_url}")
+            else:
+                logger.warning(f"Failed to load logo from URL (status {response.status_code}): {logo_url}")
+        except Exception as e:
+            logger.error(f"Error loading logo from URL {logo_url}: {e}")
+    
+    # Try local logo file if URL failed
+    if not img_bytes and LOGO_PATH.exists():
+        try:
+            logger.info(f"Attempting to load logo from local path: {LOGO_PATH}")
+            with open(LOGO_PATH, 'rb') as f:
+                img_bytes = f.read()
+            source_name = "local file"
+            logger.info(f"Successfully loaded logo from local path")
+        except Exception as e:
+            logger.error(f"Error loading logo from local path: {e}")
+    
+    # Try default logo URL as fallback
+    if not img_bytes:
+        try:
+            logger.info(f"Attempting to load default logo from: {DEFAULT_LOGO_URL}")
+            response = requests.get(DEFAULT_LOGO_URL, timeout=10)
+            if response.status_code == 200:
+                img_bytes = response.content
+                source_name = "default URL"
+                logger.info(f"Successfully loaded default logo")
+        except Exception as e:
+            logger.error(f"Error loading default logo: {e}")
+    
+    if not img_bytes:
+        logger.warning("Failed to load logo from any source")
+        return None
+    
+    # Apply color filter if specified
+    logo_filter = org.get("logo_filter", "none")
+    if logo_filter and logo_filter != "none":
+        logger.info(f"Applying logo filter: {logo_filter}")
+        custom_color = org.get("logo_custom_color", "")
+        img_bytes = _apply_color_filter(img_bytes, logo_filter, custom_color)
+    
+    # Create ImageReader from filtered bytes
+    try:
+        img = ImageReader(io.BytesIO(img_bytes))
+        logger.info(f"Successfully created ImageReader from {source_name}")
+        return img
+    except Exception as e:
+        logger.error(f"Error creating ImageReader: {e}")
+        return None
+
+
 def _register_fonts():
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
@@ -122,20 +302,28 @@ def build_invoice_pdf(
     y = PH - M
     content_w = PW - 2 * M
 
+    # Resolve brand color from settings (changes with logo color filter)
+    BRAND_COL = _brand_color(org)
+
     # ===================== TOP HEADER =====================
     # Logo (left) + brand name + tagline
     logo_w = 36
     logo_h = 36
-    if LOGO_PATH.exists():
+    
+    # Load logo from URL or local file
+    logo_img = _load_logo_image(org)
+    if logo_img:
         try:
-            img = ImageReader(str(LOGO_PATH))
-            c.drawImage(img, x, y - logo_h, width=logo_w, height=logo_h, mask="auto",
-                        preserveAspectRatio=True)
-        except Exception:
+            c.drawImage(logo_img, x, y - logo_h, width=logo_w, height=logo_h, 
+                       mask="auto", preserveAspectRatio=True)
+        except Exception as e:
+            # If image rendering fails, log error and continue without logo
+            import logging
+            logging.getLogger(__name__).error(f"Failed to render logo in PDF: {e}")
             pass
 
     # Brand text
-    c.setFillColor(BRAND)
+    c.setFillColor(BRAND_COL)
     c.setFont(F(bold=True), 22)
     c.drawString(x + logo_w + 10, y - 18, org.get("name", "Insapi Marketing"))
 
@@ -358,7 +546,7 @@ def build_invoice_pdf(
         c.drawRightString(tx + totals_w, ty, _money(paid))
         ty -= line_h
         c.setFont(F(bold=True), 10)
-        c.setFillColor(BRAND)
+        c.setFillColor(BRAND_COL)
         c.drawString(tx, ty, "Balance")
         c.drawRightString(tx + totals_w, ty, _money_full(balance))
         ty -= line_h

@@ -39,9 +39,51 @@ export default function Invoices() {
   };
 
   const sendWA = async (id) => {
-    const r = await api.get(`/invoices/${id}/whatsapp`);
-    window.open(r.data.url, "_blank");
-    window.open(`${API_BASE}/invoices/${id}/pdf`, "_blank");
+    try {
+      // Get the WhatsApp message and URL
+      const r = await api.get(`/invoices/${id}/whatsapp`);
+      
+      // Get invoice details for the filename
+      const invoice = list.find(inv => inv.id === id);
+      const filename = invoice?.number ? `Invoice-${invoice.number}.pdf` : `Invoice-${id}.pdf`;
+      
+      // Download the PDF first
+      const pdfUrl = `${API_BASE}/invoices/${id}/pdf`;
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      
+      // Create download link and trigger download
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      // Show success message with instructions
+      toast.success(`PDF downloaded as "${filename}". Opening WhatsApp...`, {
+        duration: 5000,
+      });
+      
+      // Small delay to let user see the download
+      setTimeout(() => {
+        // Open WhatsApp with the pre-filled message
+        window.open(r.data.url, "_blank");
+        
+        // Show instructions after opening WhatsApp
+        setTimeout(() => {
+          toast.info("Attach the downloaded PDF in WhatsApp and send!", {
+            duration: 7000,
+          });
+        }, 1000);
+      }, 500);
+      
+    } catch (e) {
+      console.error("WhatsApp send error:", e);
+      toast.error("Failed to prepare WhatsApp message");
+    }
   };
 
   const sendEmail = async (id) => {
@@ -126,7 +168,7 @@ export default function Invoices() {
                     onClick={() => sendEmail(inv.id)}
                     disabled={sendingEmail === inv.id}
                     className="mr-3"
-                    style={{ color: sendingEmail === inv.id ? "var(--text-tertiary)" : "#1D4ED8" }}
+                    style={{ color: sendingEmail === inv.id ? "var(--text-tertiary)" : "var(--brand-color)" }}
                     title="Send email with PDF"
                   >
                     <Mail size={14} />

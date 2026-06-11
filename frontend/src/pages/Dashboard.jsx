@@ -15,8 +15,12 @@ import {
 } from "recharts";
 import { Sparkles, ArrowUpRight, Clock, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useBranding, getBrandColor } from "../lib/branding";
+import LogoMark from "../components/LogoMark";
 
 export default function Dashboard() {
+  const { branding } = useBranding();
+  const brandColor = getBrandColor(branding);
   const [stats, setStats] = useState(null);
   const [insights, setInsights] = useState([]);
   const [forecast, setForecast] = useState(null);
@@ -70,12 +74,12 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-10" data-testid="dashboard-page">
       <PageHeader
-        eyebrow={`${monthName} · Insapi Marketing Workspace`}
+        eyebrow={`${monthName} · ${branding.name || "Insapi Marketing"}`}
         title="Command center."
         description="Track revenue, tasks, and clients in one editorial dashboard."
         actions={
           <div className="flex items-center gap-4">
-            <img src="https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png" alt="Insapi Marketing" className="w-10 h-10 object-contain" />
+            <LogoMark settings={branding} className="w-10 h-10" />
             <Link
               to="/invoices/new"
               data-testid="new-invoice-quick"
@@ -152,8 +156,8 @@ export default function Dashboard() {
               <AreaChart data={stats.trend} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
                 <defs>
                   <linearGradient id="brandFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1D4ED8" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="#1D4ED8" stopOpacity={0} />
+                    <stop offset="0%" stopColor={brandColor} stopOpacity={0.5} />
+                    <stop offset="100%" stopColor={brandColor} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
@@ -186,7 +190,7 @@ export default function Dashboard() {
                 <Area
                   type="monotone"
                   dataKey="amount"
-                  stroke="#1D4ED8"
+                  stroke={brandColor}
                   strokeWidth={2}
                   fill="url(#brandFill)"
                 />

@@ -20,19 +20,19 @@
   SetShellVarContext current
 
   ; ── Desktop shortcut ──────────────────────────────────────
-  CreateShortCut "$DESKTOP\Insapi Marketing Workspace.lnk" \
-    "$INSTDIR\Insapi Marketing Workspace.exe" \
+  CreateShortCut "$DESKTOP\Insapi Marketing.lnk" \
+    "$INSTDIR\Insapi Marketing.exe" \
     "" \
-    "$INSTDIR\Insapi Marketing Workspace.exe" \
+    "$INSTDIR\Insapi Marketing.exe" \
     0 SW_SHOWNORMAL "" \
-    "Launch Insapi Marketing Workspace"
+    "Launch Insapi Marketing"
 
   ; ── Start Menu folder + shortcuts ────────────────────────
   CreateDirectory "$SMPROGRAMS\Insapi Marketing"
-  CreateShortCut "$SMPROGRAMS\Insapi Marketing\Insapi Marketing Workspace.lnk" \
-    "$INSTDIR\Insapi Marketing Workspace.exe" \
-    "" "$INSTDIR\Insapi Marketing Workspace.exe" \
-    0 SW_SHOWNORMAL "" "Launch Insapi Marketing Workspace"
+  CreateShortCut "$SMPROGRAMS\Insapi Marketing\Insapi Marketing.lnk" \
+    "$INSTDIR\Insapi Marketing.exe" \
+    "" "$INSTDIR\Insapi Marketing.exe" \
+    0 SW_SHOWNORMAL "" "Launch Insapi Marketing"
   CreateShortCut "$SMPROGRAMS\Insapi Marketing\Uninstall.lnk" \
     "$INSTDIR\Uninstall Insapi Marketing Workspace.exe"
 
@@ -42,10 +42,10 @@
 
   WriteRegStr HKCU \
     "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.insapi.marketing.workspace" \
-    "DisplayName"     "Insapi Marketing Workspace"
+    "DisplayName"     "Insapi Marketing"
   WriteRegStr HKCU \
     "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.insapi.marketing.workspace" \
-    "DisplayIcon"     "$INSTDIR\Insapi Marketing Workspace.exe"
+    "DisplayIcon"     "$INSTDIR\Insapi Marketing.exe"
   WriteRegStr HKCU \
     "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.insapi.marketing.workspace" \
     "Publisher"       "Insapi Marketing"
@@ -72,8 +72,8 @@
   SetShellVarContext current
 
   ; Remove shortcuts
-  Delete "$DESKTOP\Insapi Marketing Workspace.lnk"
-  Delete "$SMPROGRAMS\Insapi Marketing\Insapi Marketing Workspace.lnk"
+  Delete "$DESKTOP\Insapi Marketing.lnk"
+  Delete "$SMPROGRAMS\Insapi Marketing\Insapi Marketing.lnk"
   Delete "$SMPROGRAMS\Insapi Marketing\Uninstall.lnk"
   RMDir  "$SMPROGRAMS\Insapi Marketing"
 

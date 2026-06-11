@@ -22,7 +22,7 @@ Function DesktopShortcutPage
   nsDialogs::Create 1018
   Pop $0
   
-  ${NSD_CreateLabel} 0 0 100% 24u "Create a desktop shortcut for easy access to Insapi Marketing Workspace?"
+  ${NSD_CreateLabel} 0 0 100% 24u "Create a desktop shortcut for easy access to Insapi Marketing?"
   Pop $0
   
   ${NSD_CreateCheckbox} 0 30u 100% 12u "Create desktop shortcut"
@@ -46,14 +46,14 @@ FunctionEnd
   ${If} $CreateDesktopShortcut == ${BST_CHECKED}
     DetailPrint "Creating desktop shortcut..."
     SetShellVarContext current
-    CreateShortCut "$DESKTOP\Insapi Marketing Workspace.lnk" \
-      "$INSTDIR\Insapi Marketing Workspace.exe" \
+    CreateShortCut "$DESKTOP\Insapi Marketing.lnk" \
+      "$INSTDIR\Insapi Marketing.exe" \
       "" \
-      "$INSTDIR\Insapi Marketing Workspace.exe" \
+      "$INSTDIR\Insapi Marketing.exe" \
       0 \
       SW_SHOWNORMAL \
       "" \
-      "Launch Insapi Marketing Workspace"
+      "Launch Insapi Marketing"
     DetailPrint "Desktop shortcut created!"
   ${Else}
     DetailPrint "Skipping desktop shortcut (user choice)"
@@ -64,14 +64,14 @@ FunctionEnd
   SetShellVarContext current
   CreateDirectory "$SMPROGRAMS\Insapi Marketing"
   
-  CreateShortCut "$SMPROGRAMS\Insapi Marketing\Insapi Marketing Workspace.lnk" \
-    "$INSTDIR\Insapi Marketing Workspace.exe" \
+  CreateShortCut "$SMPROGRAMS\Insapi Marketing\Insapi Marketing.lnk" \
+    "$INSTDIR\Insapi Marketing.exe" \
     "" \
-    "$INSTDIR\Insapi Marketing Workspace.exe" \
+    "$INSTDIR\Insapi Marketing.exe" \
     0 \
     SW_SHOWNORMAL \
     "" \
-    "Launch Insapi Marketing Workspace"
+    "Launch Insapi Marketing"
   
   CreateShortCut "$SMPROGRAMS\Insapi Marketing\Uninstall.lnk" \
     "$INSTDIR\Uninstall Insapi Marketing Workspace.exe"
@@ -84,8 +84,8 @@ FunctionEnd
   WriteRegStr HKCU "Software\InsapiMarketing\Workspace" "Version" "${VERSION}"
 
   ; Add/Remove Programs
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_GUID}" "DisplayName" "Insapi Marketing Workspace"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_GUID}" "DisplayIcon" "$INSTDIR\Insapi Marketing Workspace.exe"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_GUID}" "DisplayName" "Insapi Marketing"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_GUID}" "DisplayIcon" "$INSTDIR\Insapi Marketing.exe"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_GUID}" "Publisher" "Insapi Marketing"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_GUID}" "DisplayVersion" "${VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_GUID}" "URLInfoAbout" "https://insapimarketing.com"
@@ -95,7 +95,7 @@ FunctionEnd
 
   DetailPrint ""
   DetailPrint "Installation completed successfully!"
-  DetailPrint "You can now launch Insapi Marketing Workspace"
+  DetailPrint "You can now launch Insapi Marketing"
   DetailPrint ""
 !macroend
 
@@ -108,10 +108,10 @@ FunctionEnd
   DetailPrint "Removing shortcuts..."
   
   ; Remove desktop shortcut
-  Delete "$DESKTOP\Insapi Marketing Workspace.lnk"
+  Delete "$DESKTOP\Insapi Marketing.lnk"
 
   ; Remove Start Menu shortcuts
-  Delete "$SMPROGRAMS\Insapi Marketing\Insapi Marketing Workspace.lnk"
+  Delete "$SMPROGRAMS\Insapi Marketing\Insapi Marketing.lnk"
   Delete "$SMPROGRAMS\Insapi Marketing\Uninstall.lnk"
   RMDir "$SMPROGRAMS\Insapi Marketing"
 

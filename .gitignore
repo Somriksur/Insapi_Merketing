@@ -9,8 +9,10 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Build outputs
-/build
+# Build outputs — included so friends can run without building
+# /build
+# frontend/build
+# desktop/web
 
 # Environment / secrets
 .env
@@ -26,7 +28,7 @@ Thumbs.db
 
 # Logs
 npm-debug.log*
-yarn-debug.log*
+yarn-debug.log*                        
 *.log
 
 # SQLite databases (user data — not source)

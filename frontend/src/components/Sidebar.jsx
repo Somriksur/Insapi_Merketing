@@ -14,6 +14,8 @@ import {
   Receipt,
 } from "lucide-react";
 import { useTheme } from "../lib/theme";
+import { useBranding } from "../lib/branding";
+import LogoMark from "./LogoMark";
 import { Sun, Moon } from "lucide-react";
 
 const links = [
@@ -30,10 +32,9 @@ const links = [
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const LOGO_URL = "https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png";
-
 export default function Sidebar() {
   const { theme, toggle } = useTheme();
+  const { branding } = useBranding();
   return (
     <aside
       data-testid="app-sidebar"
@@ -45,12 +46,12 @@ export default function Sidebar() {
           className="w-9 h-9 flex items-center justify-center"
           style={{ background: "white", border: "1px solid var(--border)" }}
         >
-          <img src={LOGO_URL} alt="Insapi Marketing" className="w-7 h-7 object-contain" />
+          <LogoMark settings={branding} className="w-7 h-7" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="font-display font-bold text-base tracking-tight">Insapi Marketing</span>
+          <span className="font-display font-bold text-base tracking-tight" style={{ color: "var(--brand-color)" }}>{branding.name || "Insapi Marketing"}</span>
           <span className="text-[10px] uppercase tracking-[0.18em]" style={{ color: "var(--text-tertiary)" }}>
-            Workspace
+            App
           </span>
         </div>
       </div>
@@ -93,7 +94,7 @@ export default function Sidebar() {
           <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
         </button>
         <p className="mt-3 text-[10px]" style={{ color: "var(--text-tertiary)" }}>
-          v1.0 · Insapi Marketing Workspace
+          v1.0 · {branding.name || "Insapi Marketing"}
         </p>
       </div>
     </aside>

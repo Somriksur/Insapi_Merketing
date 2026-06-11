@@ -43,6 +43,12 @@ const webpackConfig = {
         ],
       };
 
+      // Disable terser minification — fixes hang on Apple Silicon / Node 22
+      webpackConfig.optimization = {
+        ...webpackConfig.optimization,
+        minimize: false,
+      };
+
       if (config.enableHealthCheck && healthPluginInstance) {
         webpackConfig.plugins.push(healthPluginInstance);
       }

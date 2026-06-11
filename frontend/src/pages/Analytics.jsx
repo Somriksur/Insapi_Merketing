@@ -17,11 +17,12 @@ import {
 } from "recharts";
 import { formatINR } from "../lib/format";
 import { Trophy, Zap, Clock } from "lucide-react";
-
-const COLORS = ["#1D4ED8", "#10B981", "#F59E0B", "#A78BFA", "#EF4444", "#22D3EE"];
+import { useBranding, getBrandColor } from "../lib/branding";
 
 export default function Analytics() {
-  const [data, setData] = useState(null);
+  const { branding } = useBranding();
+  const brandColor = getBrandColor(branding);
+  const COLORS = [brandColor, "#10B981", "#F59E0B", "#A78BFA", "#EF4444", "#22D3EE"];
   const [expenses, setExpenses] = useState([]);
 
   useEffect(() => {
@@ -110,7 +111,7 @@ export default function Analytics() {
                   contentStyle={{ background: "var(--bg-surface)", border: "1px solid var(--border-strong)", borderRadius: 0 }}
                   formatter={(v) => [formatINR(v), "Revenue"]}
                 />
-                <Bar dataKey="amount" fill="#1D4ED8" />
+                <Bar dataKey="amount" fill={brandColor} />
               </BarChart>
             </ResponsiveContainer>
           </div>

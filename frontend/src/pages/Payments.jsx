@@ -2,13 +2,27 @@ import React, { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import PageHeader from "../components/PageHeader";
 import StatusBadge from "../components/StatusBadge";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { toast } from "sonner";
 import { formatDate, formatINR } from "../lib/format";
+
+// Generate list of months from 24 months ago up to current month
+function generateMonthOptions() {
+  const options = [];
+  const now = new Date();
+  for (let i = 23; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const label = d.toLocaleString("default", { month: "long", year: "numeric" });
+    options.push({ value, label });
+  }
+  return options;
+}
+const MONTH_OPTIONS = generateMonthOptions();
 
 const empty = {
   client_id: "",
@@ -93,7 +107,14 @@ export default function Payments() {
   const clientName = (id) => clients.find((c) => c.id === id)?.name || "—";
   const invoiceNumber = (id) => invoices.find((c) => c.id === id)?.number || "—";
 
-  const filtered = list.filter((p) => filter === "all" || p.status === filter);
+  const filtered = list.filter((p) => {
+    // Month filter — match against paid_at or created_at
+    const d = p.paid_at || p.created_at || "";
+    const inMonth = d.startsWith(monthFilter);
+    // Status filter
+    const statusMatch = filter === "all" || p.status === filter;
+    return inMonth && statusMatch;
+  });
 
   const totals = {
     received: list.reduce((a, b) => a + (b.paid_amount || 0), 0),
@@ -164,6 +185,12 @@ export default function Payments() {
       remaining: inv.total_amount - inv.total_paid,
     }))
     .sort((a, b) => b.remaining - a.remaining);
+
+  // helpers for prev/next month navigation
+  const currentIdx = MONTH_OPTIONS.findIndex((m) => m.value === monthFilter);
+  const goPrev = () => { if (currentIdx > 0) setMonthFilter(MONTH_OPTIONS[currentIdx - 1].value); };
+  const goNext = () => { if (currentIdx < MONTH_OPTIONS.length - 1) setMonthFilter(MONTH_OPTIONS[currentIdx + 1].value); };
+  const selectedLabel = MONTH_OPTIONS.find((m) => m.value === monthFilter)?.label || monthFilter;
 
   return (
     <div data-testid="payments-page">
@@ -248,6 +275,78 @@ export default function Payments() {
         }
       />
 
+      {/* ── Month Selector Bar ── */}
+      <div
+        className="flex items-center justify-between mb-6 px-5 py-3"
+        style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}
+      >
+        <div className="flex items-center gap-3">
+          <CalendarDays size={16} style={{ color: "var(--brand)" }} />
+          <span className="label-tiny">Viewing month</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Prev arrow */}
+          <button
+            onClick={goPrev}
+            disabled={currentIdx === 0}
+            className="p-1.5 rounded"
+            style={{
+              border: "1px solid var(--border)",
+              color: currentIdx === 0 ? "var(--text-tertiary)" : "var(--text-primary)",
+              cursor: currentIdx === 0 ? "not-allowed" : "pointer",
+              background: "transparent",
+            }}
+          >
+            <ChevronLeft size={14} />
+          </button>
+
+          {/* Dropdown */}
+          <Select value={monthFilter} onValueChange={setMonthFilter}>
+            <SelectTrigger
+              className="w-48 text-sm font-medium"
+              style={{
+                background: "var(--bg-surface-hover)",
+                border: "1px solid var(--border-strong)",
+                color: "var(--text-primary)",
+              }}
+            >
+              <SelectValue>{selectedLabel}</SelectValue>
+            </SelectTrigger>
+            <SelectContent style={{ maxHeight: 280 }}>
+              {MONTH_OPTIONS.map((m) => (
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Next arrow */}
+          <button
+            onClick={goNext}
+            disabled={currentIdx === MONTH_OPTIONS.length - 1}
+            className="p-1.5 rounded"
+            style={{
+              border: "1px solid var(--border)",
+              color: currentIdx === MONTH_OPTIONS.length - 1 ? "var(--text-tertiary)" : "var(--text-primary)",
+              cursor: currentIdx === MONTH_OPTIONS.length - 1 ? "not-allowed" : "pointer",
+              background: "transparent",
+            }}
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
+
+        {/* Payment count badge for selected month */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+            {monthlyPayments.length} payment{monthlyPayments.length !== 1 ? "s" : ""} ·{" "}
+            <span style={{ color: "#10B981" }}>{formatINR(monthlyTotals.received)} received</span>
+          </span>
+        </div>
+      </div>
+
+      {/* ── Summary Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
         <div className="surface p-5">
           <p className="label-tiny">Total Received (All-time)</p>
@@ -255,27 +354,18 @@ export default function Payments() {
           <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>All payments received</p>
         </div>
         <div className="surface p-5">
-          <div className="flex items-center justify-between mb-1">
-            <p className="label-tiny">This Month</p>
-            <input
-              type="month"
-              value={monthFilter}
-              onChange={(e) => setMonthFilter(e.target.value)}
-              className="text-xs px-1 py-0.5"
-              style={{ background: "var(--bg-surface-hover)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-            />
-          </div>
-          <p className="font-display text-3xl font-bold tracking-tighter" style={{ color: "#1D4ED8" }}>{formatINR(monthlyTotals.received)}</p>
-          <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>{monthlyTotals.count} payment{monthlyTotals.count !== 1 ? "s" : ""} this month</p>
+          <p className="label-tiny">This Month</p>
+          <p className="font-display text-3xl font-bold tracking-tighter" style={{ color: "var(--brand-color)" }}>{formatINR(monthlyTotals.received)}</p>
+          <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>{monthlyTotals.count} payment{monthlyTotals.count !== 1 ? "s" : ""} in {selectedLabel}</p>
         </div>
-        <div 
+        <div
           className="surface p-5 cursor-pointer hover-surface"
           onClick={() => setShowOutstanding(true)}
         >
           <p className="label-tiny">Outstanding</p>
           <p className="font-display text-3xl font-bold tracking-tighter" style={{ color: "#F59E0B" }}>{formatINR(actualOutstanding)}</p>
           <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>
-            {outstandingPayments.length} invoice{outstandingPayments.length !== 1 ? 's' : ''} · Click to view
+            {outstandingPayments.length} invoice{outstandingPayments.length !== 1 ? "s" : ""} · Click to view
           </p>
         </div>
         <div className="surface p-5">
@@ -338,7 +428,7 @@ export default function Payments() {
                       </div>
                       {inv.payments.length > 1 && (
                         <div className="mt-2 pl-3 border-l-2" style={{ borderColor: "var(--border)" }}>
-                          {inv.payments.map((p, idx) => (
+                          {inv.payments.map((p) => (
                             <div key={p.id} className="text-xs mb-1" style={{ color: "var(--text-tertiary)" }}>
                               {formatDate(p.paid_at || p.created_at)}: {formatINR(p.paid_amount)} via {p.method}
                             </div>
@@ -370,24 +460,33 @@ export default function Payments() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {["all", "pending", "partial", "paid", "overdue"].map((s) => (
-          <button
-            key={s}
-            data-testid={`filter-${s}`}
-            onClick={() => setFilter(s)}
-            className="px-3 py-1.5 text-xs uppercase tracking-widest"
-            style={{
-              border: "1px solid var(--border)",
-              background: filter === s ? "var(--brand)" : "transparent",
-              color: filter === s ? "white" : "var(--text-secondary)",
-            }}
-          >
-            {s}
-          </button>
-        ))}
+      {/* ── Status Filter Tabs ── */}
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {["all", "pending", "partial", "paid", "overdue"].map((s) => (
+            <button
+              key={s}
+              data-testid={`filter-${s}`}
+              onClick={() => setFilter(s)}
+              className="px-3 py-1.5 text-xs uppercase tracking-widest"
+              style={{
+                border: "1px solid var(--border)",
+                background: filter === s ? "var(--brand)" : "transparent",
+                color: filter === s ? "white" : "var(--text-secondary)",
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        {filtered.length > 0 && (
+          <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+            {filtered.length} record{filtered.length !== 1 ? "s" : ""}
+          </span>
+        )}
       </div>
 
+      {/* ── Payments Table ── */}
       <div className="surface">
         <table className="w-full text-sm">
           <thead>
@@ -399,7 +498,14 @@ export default function Payments() {
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={8} className="px-5 py-10 text-center" style={{ color: "var(--text-tertiary)" }}>No payments.</td></tr>
+              <tr>
+                <td colSpan={8} className="px-5 py-12 text-center" style={{ color: "var(--text-tertiary)" }}>
+                  <div className="flex flex-col items-center gap-2">
+                    <CalendarDays size={24} style={{ opacity: 0.3 }} />
+                    <span>No payments for {selectedLabel}</span>
+                  </div>
+                </td>
+              </tr>
             )}
             {filtered.map((p) => (
               <tr

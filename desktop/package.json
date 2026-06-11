@@ -1,7 +1,7 @@
 {
   "name": "insapi-marketing-workspace-desktop",
   "version": "1.0.0",
-  "description": "Insapi Marketing Workspace - a local-first business workspace for creative freelancers.",
+  "description": "Insapi Marketing - a local-first business workspace for creative freelancers.",
   "main": "main.js",
   "author": "Insapi Marketing",
   "license": "UNLICENSED",
@@ -24,7 +24,7 @@
   
   "build": {
     "appId": "com.insapi.marketing.workspace",
-    "productName": "Insapi Marketing Workspace",
+    "productName": "Insapi Marketing",
     "copyright": "Copyright 2026 Insapi Marketing. All rights reserved.",
     "directories": {
       "output": "dist",
@@ -50,7 +50,7 @@
         }
       ],
       "icon": "assets/icon.ico",
-      "artifactName": "Insapi-Marketing-Workspace-Setup-${version}.${ext}",
+      "artifactName": "Insapi-Marketing-Setup-${version}.${ext}",
       "publisherName": "Insapi Marketing",
       "verifyUpdateCodeSignature": false,
       "requestedExecutionLevel": "highestAvailable",
@@ -67,13 +67,13 @@
       "installerSidebar": "assets/installer-sidebar.bmp",
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
-      "shortcutName": "Insapi Marketing Workspace",
+      "shortcutName": "Insapi Marketing",
       "include": "installer-simple.nsh",
       "license": "LICENSE.txt",
       "deleteAppDataOnUninstall": false,
       "runAfterFinish": true,
       "menuCategory": "Insapi Marketing",
-      "artifactName": "Insapi-Marketing-Workspace-Setup-${version}.${ext}",
+      "artifactName": "Insapi-Marketing-Setup-${version}.${ext}",
       "displayLanguageSelector": false,
       "installerLanguages": ["en_US"],
       "language": "1033",
@@ -81,7 +81,7 @@
       "perMachine": false
     },
     "portable": {
-      "artifactName": "Insapi-Marketing-Workspace-Portable-${version}.${ext}"
+      "artifactName": "Insapi-Marketing-Portable-${version}.${ext}"
     }
   }
 }

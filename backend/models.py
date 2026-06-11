@@ -44,7 +44,9 @@ class OrgSettings(BaseModel):
         "PDF attached.\n\n"
         "Thanks,\n{owner_name} · {org_name}"
     )
-    logo_url: str = "https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png"
+    logo_url: str = ""
+    logo_filter: str = "none"  # none|grayscale|blue|red|green|custom
+    logo_custom_color: str = ""  # hex color for custom filter
     # Email / SMTP settings
     smtp_host: str = ""
     smtp_port: int = 587

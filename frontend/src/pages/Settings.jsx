@@ -4,10 +4,14 @@ import PageHeader from "../components/PageHeader";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { toast } from "sonner";
 import { Save } from "lucide-react";
+import { useBranding, DEFAULT_LOGO_URL } from "../lib/branding";
+import LogoMark from "../components/LogoMark";
 
 export default function Settings() {
+  const { setBranding } = useBranding();
   const [s, setS] = useState(null);
 
   useEffect(() => {
@@ -20,6 +24,7 @@ export default function Settings() {
   const save = async () => {
     const r = await api.put("/settings", s);
     setS(r.data);
+    setBranding(r.data);
     toast.success("Settings saved");
   };
 
@@ -41,12 +46,49 @@ export default function Settings() {
           <p className="label-tiny">Organisation</p>
           <div className="flex items-center gap-3">
             <div className="w-14 h-14 bg-white flex items-center justify-center" style={{ border: "1px solid var(--border)" }}>
-              <img src={s.logo_url || "https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png"} alt="logo" className="w-10 h-10 object-contain" />
+              <LogoMark settings={s} className="w-10 h-10" alt="Logo preview" />
             </div>
             <div className="flex-1">
               <Label className="label-tiny">Logo URL</Label>
-              <Input placeholder="https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png" value={s.logo_url || ""} onChange={(e) => upd("logo_url", e.target.value)} />
+              <Input placeholder={DEFAULT_LOGO_URL} value={s.logo_url || ""} onChange={(e) => upd("logo_url", e.target.value)} />
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="label-tiny">Logo Color Filter</Label>
+              <Select value={s.logo_filter || "none"} onValueChange={(v) => upd("logo_filter", v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="No filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No filter</SelectItem>
+                  <SelectItem value="grayscale">Grayscale</SelectItem>
+                  <SelectItem value="blue">Blue tint</SelectItem>
+                  <SelectItem value="red">Red tint</SelectItem>
+                  <SelectItem value="green">Green tint</SelectItem>
+                  <SelectItem value="custom">Custom color</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {s.logo_filter === "custom" && (
+              <div>
+                <Label className="label-tiny">Custom Color (Hex)</Label>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="color" 
+                    value={s.logo_custom_color || "#000000"} 
+                    onChange={(e) => upd("logo_custom_color", e.target.value)}
+                    className="w-12 h-10 p-1 cursor-pointer"
+                  />
+                  <Input 
+                    placeholder="#000000" 
+                    value={s.logo_custom_color || ""} 
+                    onChange={(e) => upd("logo_custom_color", e.target.value)}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="label-tiny">Name</Label><Input value={s.name} onChange={(e) => upd("name", e.target.value)} /></div>

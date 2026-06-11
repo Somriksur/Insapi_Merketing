@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, API_BASE } from "../lib/api";
+import LogoMark from "../components/LogoMark";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
@@ -31,6 +32,12 @@ export default function InvoiceEditor() {
     method: "UPI",
     notes: "",
   });
+  
+  // Client autocomplete state
+  const [clientSearch, setClientSearch] = useState("");
+  const [showClientSuggestions, setShowClientSuggestions] = useState(false);
+  const [selectedClientName, setSelectedClientName] = useState("");
+  const clientInputRef = useRef(null);
 
   const load = async () => {
     const [c, p, s] = await Promise.all([
@@ -62,10 +69,85 @@ export default function InvoiceEditor() {
       setInv(invRes.data);
       // Filter payments for this invoice
       setPayments(paymentsRes.data.filter(p => p.invoice_id === id));
+      
+      // Set the client name if a client is selected
+      if (invRes.data.client_id) {
+        const client = c.data.find(cl => cl.id === invRes.data.client_id);
+        if (client) {
+          setSelectedClientName(client.name);
+          setClientSearch(client.name);
+        }
+      }
     }
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
+
+  // Filter clients based on search input
+  const filteredClients = useMemo(() => {
+    if (!clientSearch || clientSearch.length === 0) return clients;
+    const search = clientSearch.toLowerCase();
+    return clients.filter(c => 
+      c.name.toLowerCase().includes(search) || 
+      (c.company && c.company.toLowerCase().includes(search))
+    );
+  }, [clientSearch, clients]);
+
+  // Handle client selection from suggestions
+  const selectClient = (client) => {
+    setClientSearch(client.name);
+    setSelectedClientName(client.name);
+    upd("client_id", client.id);
+    setShowClientSuggestions(false);
+  };
+
+  // Handle manual client name entry (new client)
+  const handleClientInputChange = (value) => {
+    setClientSearch(value);
+    setShowClientSuggestions(value.length > 0);
+    
+    // Check if it matches an existing client
+    const exactMatch = clients.find(c => c.name.toLowerCase() === value.toLowerCase());
+    if (exactMatch) {
+      upd("client_id", exactMatch.id);
+      setSelectedClientName(exactMatch.name);
+    } else {
+      // Clear client_id if it's a new name
+      upd("client_id", "");
+      setSelectedClientName(value);
+    }
+  };
+
+  // Handle blur - create new client if needed
+  const handleClientBlur = async () => {
+    setTimeout(() => setShowClientSuggestions(false), 200);
+    
+    // If user typed a name that doesn't exist, create the client
+    if (clientSearch && clientSearch.trim() && !inv.client_id) {
+      try {
+        const newClient = await api.post("/clients", {
+          name: clientSearch.trim(),
+          company: "",
+          email: "",
+          whatsapp: "",
+          address: "",
+          rating: 5,
+          notes: "",
+          tags: []
+        });
+        
+        // Update the clients list
+        setClients(prev => [...prev, newClient.data]);
+        
+        // Select the new client
+        upd("client_id", newClient.data.id);
+        setSelectedClientName(newClient.data.name);
+        toast.success(`New client "${newClient.data.name}" created`);
+      } catch (err) {
+        console.error("Failed to create client:", err);
+      }
+    }
+  };
 
   const upd = (k, v) => setInv((x) => ({ ...x, [k]: v }));
   const updLine = (i, k, v) => {
@@ -130,9 +212,51 @@ export default function InvoiceEditor() {
 
   const sendWA = async () => {
     if (isNew) return toast.error("Save first");
-    const r = await api.get(`/invoices/${id}/whatsapp`);
-    window.open(r.data.url, "_blank");
-    window.open(`${API_BASE}/invoices/${id}/pdf`, "_blank");
+    
+    try {
+      // Get the WhatsApp message and URL
+      const r = await api.get(`/invoices/${id}/whatsapp`);
+      
+      // Get invoice number for the filename
+      const filename = inv.number ? `Invoice-${inv.number}.pdf` : `Invoice-${id}.pdf`;
+      
+      // Download the PDF first
+      const pdfUrl = `${API_BASE}/invoices/${id}/pdf`;
+      const response = await fetch(pdfUrl);
+      const blob = await response.blob();
+      
+      // Create download link and trigger download
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      // Show success message with instructions
+      toast.success(`PDF downloaded as "${filename}". Opening WhatsApp...`, {
+        duration: 5000,
+      });
+      
+      // Small delay to let user see the download
+      setTimeout(() => {
+        // Open WhatsApp with the pre-filled message
+        window.open(r.data.url, "_blank");
+        
+        // Show instructions after opening WhatsApp
+        setTimeout(() => {
+          toast.info("Attach the downloaded PDF in WhatsApp and send!", {
+            duration: 7000,
+          });
+        }, 1000);
+      }, 500);
+      
+    } catch (e) {
+      console.error("WhatsApp send error:", e);
+      toast.error("Failed to prepare WhatsApp message");
+    }
   };
 
   const sendEmail = async () => {
@@ -227,7 +351,7 @@ export default function InvoiceEditor() {
                 disabled={sendingEmail}
                 data-testid="invoice-email-btn"
                 className="px-4 py-2 text-sm flex items-center gap-2"
-                style={{ background: "#1D4ED8", color: "white", opacity: sendingEmail ? 0.6 : 1 }}
+                style={{ background: "var(--brand-color)", color: "white", opacity: sendingEmail ? 0.6 : 1 }}
               >
                 <Mail size={14} /> {sendingEmail ? "Sending…" : "Email PDF"}
               </button>
@@ -242,15 +366,50 @@ export default function InvoiceEditor() {
           <div className="surface p-5 space-y-4">
             <p className="label-tiny">Details</p>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="label-tiny">Client</Label>
-                <Select value={inv.client_id || "_none"} onValueChange={(v) => upd("client_id", v === "_none" ? "" : v)}>
-                  <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">None</SelectItem>
-                    {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+              <div className="relative">
+                <Label className="label-tiny">Client Name</Label>
+                <Input
+                  ref={clientInputRef}
+                  type="text"
+                  placeholder="Type client name..."
+                  value={clientSearch}
+                  onChange={(e) => handleClientInputChange(e.target.value)}
+                  onFocus={() => setShowClientSuggestions(clientSearch.length > 0)}
+                  onBlur={handleClientBlur}
+                  className="w-full"
+                  data-testid="client-autocomplete-input"
+                />
+                {showClientSuggestions && filteredClients.length > 0 && (
+                  <div 
+                    className="absolute z-50 w-full mt-1 bg-white shadow-lg border max-h-48 overflow-y-auto"
+                    style={{ 
+                      border: "1px solid var(--border)",
+                      borderRadius: "4px"
+                    }}
+                  >
+                    {filteredClients.map((c) => (
+                      <div
+                        key={c.id}
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          selectClient(c);
+                        }}
+                        data-testid={`client-suggestion-${c.id}`}
+                      >
+                        <div className="font-medium">{c.name}</div>
+                        {c.company && (
+                          <div className="text-xs text-gray-500">{c.company}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {clientSearch && !inv.client_id && (
+                  <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>
+                    New client will be created
+                  </p>
+                )}
               </div>
               <div>
                 <Label className="label-tiny">Project</Label>
@@ -478,9 +637,9 @@ export default function InvoiceEditor() {
           <div className="bg-white text-black p-8 shadow-2xl" style={{ minHeight: 800 }}>
             <div className="flex justify-between items-start gap-4 pb-4" style={{ borderBottom: "2px solid #0B0B0B" }}>
               <div className="flex items-center gap-3">
-                <img src={org.logo_url || "https://res.cloudinary.com/ds2xh85dt/image/upload/v1779656917/ChatGPT_Image_May_25_2026_02_37_24_AM_m8b5km.png"} alt="logo" className="w-12 h-12 object-contain" />
+                <LogoMark settings={org} className="w-12 h-12" alt="logo" />
                 <div>
-                  <p className="font-bold text-2xl tracking-tight" style={{ color: "#1D4ED8", fontFamily: "'Outfit', sans-serif" }}>{org.name}</p>
+                  <p className="font-bold text-2xl tracking-tight" style={{ color: "var(--brand-color)", fontFamily: "'Outfit', sans-serif" }}>{org.name}</p>
                   <p className="text-[10px] text-gray-500 uppercase tracking-widest">{org.website}</p>
                 </div>
               </div>
@@ -569,7 +728,7 @@ export default function InvoiceEditor() {
                 {!isNew && payments.length === 0 && inv.paid_amount > 0 && (
                   <>
                     <div className="flex justify-between"><span className="text-gray-600">Paid</span><span className="font-mono">{formatINR(inv.paid_amount)}</span></div>
-                    <div className="flex justify-between font-bold" style={{ color: "#1D4ED8" }}>
+                    <div className="flex justify-between font-bold" style={{ color: "var(--brand-color)" }}>
                       <span>Balance</span><span className="font-mono">{formatINR(Math.max(0, totals.total - (inv.paid_amount || 0)))}</span>
                     </div>
                   </>

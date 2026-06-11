@@ -1,5 +1,5 @@
 // Electron main process - boots local FastAPI backend, then renders the React UI.
-const { app, BrowserWindow, Menu, shell, dialog } = require("electron");
+const { app, BrowserWindow, Menu, shell, dialog, nativeImage } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const http = require("http");
@@ -9,6 +9,22 @@ const BACKEND_PORT = 51808;
 const FRONTEND_PORT = 51807;
 let backendProc = null;
 let win = null;
+
+function getAppIconPath() {
+  return path.join(__dirname, "assets", "icon.png");
+}
+
+function applyAppBranding() {
+  app.setName("Insapi Marketing");
+  app.setAppUserModelId("com.insapi.marketing");
+
+  if (process.platform === "darwin" && app.dock) {
+    const icon = nativeImage.createFromPath(getAppIconPath());
+    if (!icon.isEmpty()) {
+      app.dock.setIcon(icon);
+    }
+  }
+}
 
 function logStartup(message) {
   try {
@@ -121,8 +137,8 @@ function createWindow() {
     minWidth: 1100,
     minHeight: 720,
     backgroundColor: "#050505",
-    title: "Insapi Marketing Workspace",
-    icon: path.join(__dirname, "assets", "icon.png"),
+    title: "Insapi Marketing",
+    icon: getAppIconPath(),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -151,6 +167,7 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  applyAppBranding();
   Menu.setApplicationMenu(null);
   logStartup("App ready");
   try {
@@ -160,7 +177,7 @@ app.whenReady().then(async () => {
   } catch (e) {
     logStartup(`Startup failed: ${e.stack || e.message || String(e)}`);
     dialog.showErrorBox(
-      "Insapi Marketing Workspace - Startup Error",
+      "Insapi Marketing - Startup Error",
       "Unable to start the application backend.\n\n" +
       "Please try:\n" +
       "1. Restart your computer\n" +
