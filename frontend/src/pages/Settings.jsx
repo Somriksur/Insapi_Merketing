@@ -120,6 +120,64 @@ export default function Settings() {
         </div>
 
         <div className="surface p-6 space-y-3">
+          <p className="label-tiny">Invoice Template Color</p>
+          <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+            Choose a color for the invoice header, table, and accent lines. This affects both the live preview and the downloaded PDF.
+          </p>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              id="invoice-color-picker"
+              value={s.invoice_color || "#0B0B0B"}
+              onChange={(e) => upd("invoice_color", e.target.value)}
+              style={{
+                width: 48,
+                height: 48,
+                padding: 2,
+                border: "1px solid var(--border)",
+                borderRadius: 4,
+                cursor: "pointer",
+                background: "none",
+              }}
+            />
+            <div className="flex-1">
+              <Label className="label-tiny">Hex Color</Label>
+              <Input
+                placeholder="#0B0B0B"
+                value={s.invoice_color || ""}
+                onChange={(e) => upd("invoice_color", e.target.value)}
+              />
+            </div>
+            {/* Preview swatches */}
+            <div className="flex flex-col gap-1 items-center">
+              {["#0B0B0B", "#1D4ED8", "#7C3AED", "#059669", "#DC2626", "#D97706"].map((c) => (
+                <button
+                  key={c}
+                  title={c}
+                  onClick={() => upd("invoice_color", c)}
+                  style={{
+                    width: 20,
+                    height: 20,
+                    background: c,
+                    border: s.invoice_color === c ? "2px solid white" : "2px solid transparent",
+                    borderRadius: 3,
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          {/* Live mini preview */}
+          <div className="mt-3 p-3 rounded text-xs" style={{ background: s.invoice_color || "#0B0B0B", color: "white", fontFamily: "'Outfit', sans-serif" }}>
+            <span className="font-bold tracking-widest uppercase" style={{ fontSize: 10 }}>Invoice Header Preview</span>
+            <div className="flex justify-between mt-1">
+              <span>#&nbsp;&nbsp;Description</span>
+              <span>Amount</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="surface p-6 space-y-3">
           <p className="label-tiny">Bank / UPI</p>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="label-tiny">Bank name</Label><Input value={s.bank_name} onChange={(e) => upd("bank_name", e.target.value)} /></div>

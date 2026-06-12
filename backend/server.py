@@ -108,6 +108,7 @@ class SettingsUpdate(BaseModel):
     logo_url: Optional[str] = None
     logo_filter: Optional[str] = None
     logo_custom_color: Optional[str] = None
+    invoice_color: Optional[str] = None
     smtp_host: Optional[str] = None
     smtp_port: Optional[int] = None
     smtp_user: Optional[str] = None

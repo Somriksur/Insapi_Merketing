@@ -47,6 +47,7 @@ class OrgSettings(BaseModel):
     logo_url: str = ""
     logo_filter: str = "none"  # none|grayscale|blue|red|green|custom
     logo_custom_color: str = ""  # hex color for custom filter
+    invoice_color: str = "#0B0B0B"  # color used in invoice template header/accents
     # Email / SMTP settings
     smtp_host: str = ""
     smtp_port: int = 587

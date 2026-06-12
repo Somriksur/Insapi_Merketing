@@ -23,6 +23,7 @@ export default function Analytics() {
   const { branding } = useBranding();
   const brandColor = getBrandColor(branding);
   const COLORS = [brandColor, "#10B981", "#F59E0B", "#A78BFA", "#EF4444", "#22D3EE"];
+  const [data, setData] = useState(null);
   const [expenses, setExpenses] = useState([]);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function Analytics() {
     ]).then(([r, e]) => {
       setData(r.data);
       setExpenses(e.data);
-    });
+    }).catch(() => {});
   }, []);
 
   if (!data) return <p className="p-8" style={{ color: "var(--text-tertiary)" }}>Loading…</p>;

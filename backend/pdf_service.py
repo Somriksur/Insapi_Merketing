@@ -304,6 +304,10 @@ def build_invoice_pdf(
 
     # Resolve brand color from settings (changes with logo color filter)
     BRAND_COL = _brand_color(org)
+    # Resolve invoice template accent color (header, table, dividers)
+    _inv_color_hex = (org.get("invoice_color") or "").strip()
+    import re as _re
+    INV_COLOR = colors.HexColor(_inv_color_hex) if _re.match(r"^#[0-9a-fA-F]{6}$", _inv_color_hex) else INK
 
     # ===================== TOP HEADER =====================
     # Logo (left) + brand name + tagline
@@ -323,7 +327,7 @@ def build_invoice_pdf(
             pass
 
     # Brand text
-    c.setFillColor(BRAND_COL)
+    c.setFillColor(INV_COLOR)
     c.setFont(F(bold=True), 22)
     c.drawString(x + logo_w + 10, y - 18, org.get("name", "Insapi Marketing"))
 
@@ -340,9 +344,9 @@ def build_invoice_pdf(
     invoice_no = invoice.get("number") or "DRAFT"
     c.drawRightString(PW - M, y - 32, invoice_no)
 
-    # Horizontal black rule under header
+    # Horizontal rule under header — uses invoice color
     rule_y = y - 48
-    c.setStrokeColor(INK)
+    c.setStrokeColor(INV_COLOR)
     c.setLineWidth(1.2)
     c.line(x, rule_y, PW - M, rule_y)
 
@@ -435,8 +439,8 @@ def build_invoice_pdf(
     col_amt_w = 80
     col_desc_w = content_w - col_no_w - col_qty_w - col_rate_w - col_amt_w
 
-    # Header bar (black)
-    c.setFillColor(INK)
+    # Header bar — uses invoice color
+    c.setFillColor(INV_COLOR)
     c.rect(x, table_y - header_h, content_w, header_h, fill=1, stroke=0)
     c.setFillColor(colors.white)
     c.setFont(F(bold=True), 7.5)
@@ -527,9 +531,9 @@ def build_invoice_pdf(
         c.drawRightString(tx + totals_w, ty, val)
         ty -= line_h
 
-    # Total rule
+    # Total rule — uses invoice color
     ty -= 4
-    c.setStrokeColor(INK)
+    c.setStrokeColor(INV_COLOR)
     c.setLineWidth(0.8)
     c.line(tx, ty + 8, tx + totals_w, ty + 8)
     c.setFont(F(bold=True), 10)

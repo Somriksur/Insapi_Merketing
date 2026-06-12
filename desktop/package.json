@@ -53,8 +53,11 @@
       "artifactName": "Insapi-Marketing-Setup-${version}.${ext}",
       "publisherName": "Insapi Marketing",
       "verifyUpdateCodeSignature": false,
-      "requestedExecutionLevel": "highestAvailable",
-      "signAndEditExecutable": false
+      "requestedExecutionLevel": "asInvoker",
+      "signAndEditExecutable": true,
+      "legalTrademarks": "Copyright 2026 Insapi Marketing. All rights reserved.",
+      "fileDescription": "Insapi Marketing Workspace",
+      "productVersion": "1.0.0"
     },
     "nsis": {
       "oneClick": false,

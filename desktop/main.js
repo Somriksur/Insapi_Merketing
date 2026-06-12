@@ -9,6 +9,9 @@ const BACKEND_PORT = 51808;
 const FRONTEND_PORT = 51807;
 let backendProc = null;
 let win = null;
+let backendRestartCount = 0;
+const MAX_BACKEND_RESTARTS = 5;
+let backendRestartTimer = null;
 
 function getAppIconPath() {
   return path.join(__dirname, "assets", "icon.png");
@@ -105,10 +108,29 @@ function startBackend() {
     logStartup(`Backend spawn error: ${error.stack || error.message || String(error)}`);
   });
 
-  backendProc.on("exit", (code) => {
-    logStartup(`Backend exited. code=${code}`);
-    console.log("backend exited", code);
+  backendProc.on("exit", (code, signal) => {
+    logStartup(`Backend exited. code=${code} signal=${signal}`);
+    console.log("backend exited", code, signal);
     backendProc = null;
+
+    // Auto-restart unless the app is quitting intentionally
+    if (app.isQuitting) return;
+    if (backendRestartCount < MAX_BACKEND_RESTARTS) {
+      backendRestartCount++;
+      const delay = Math.min(1000 * backendRestartCount, 5000); // 1s, 2s, 3s, 4s, 5s
+      logStartup(`Scheduling backend restart #${backendRestartCount} in ${delay}ms`);
+      backendRestartTimer = setTimeout(() => {
+        logStartup(`Restarting backend (attempt ${backendRestartCount}/${MAX_BACKEND_RESTARTS})`);
+        startBackend();
+      }, delay);
+    } else {
+      logStartup(`Backend exceeded max restarts (${MAX_BACKEND_RESTARTS}). Giving up.`);
+      if (win) {
+        win.webContents.executeJavaScript(
+          `document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#050505;color:#fff;font-family:sans-serif;flex-direction:column;gap:16px"><h2>Backend stopped unexpectedly</h2><p style=\'color:#888\'>Please restart the application.</p></div>'`
+        ).catch(() => {});
+      }
+    }
   });
 }
 
@@ -191,7 +213,14 @@ app.whenReady().then(async () => {
   createWindow();
 });
 
+app.on("before-quit", () => {
+  app.isQuitting = true;
+  if (backendRestartTimer) clearTimeout(backendRestartTimer);
+  if (backendProc) {
+    try { backendProc.kill(); } catch {}
+  }
+});
+
 app.on("window-all-closed", () => {
-  if (backendProc) try { backendProc.kill(); } catch {}
   if (process.platform !== "darwin") app.quit();
 });
