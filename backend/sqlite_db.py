@@ -247,8 +247,8 @@ class SQLiteDatabase:
 def default_sqlite_path() -> Path:
     data_dir = os.environ.get("DATA_DIR")
     if data_dir:
-        return Path(data_dir) / "webdesert_workspace.sqlite3"
-    return Path(__file__).parent / "webdesert_workspace.sqlite3"
+        return Path(data_dir) / "insapi_workspace.sqlite3"
+    return Path(__file__).parent / "insapi_workspace.sqlite3"
 
 
 def create_database() -> SQLiteDatabase:
