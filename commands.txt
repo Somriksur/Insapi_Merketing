@@ -30,14 +30,40 @@ NOTE: frontend/.env must have:
   REACT_APP_BACKEND_URL=http://127.0.0.1:8000
 
 ================================================================
-  BUILD / INSTALLER COMMANDS (Production)
+  WINDOWS FIRST-TIME SETUP (run once before dev mode)
+================================================================
+
+Prerequisites (install these first):
+  1. Python 3.11+  -->  https://www.python.org/downloads/
+                        CHECK "Add Python to PATH" during install!
+  2. Node.js LTS   -->  https://nodejs.org/en/download/
+                        npm is included automatically.
+  3. Git (optional) --> https://git-scm.com/download/win
+
+--- Backend setup (run in Command Prompt / PowerShell) ---
+  cd backend
+  python -m venv .venv
+  .venv\Scripts\activate
+  pip install -r requirements.txt
+
+--- Frontend setup ---
+  cd frontend
+  npm install
+
+--- Verify setup ---
+  python --version        (should say 3.11 or higher)
+  node --version          (should say 18 or higher)
+  npm --version           (should say 9 or higher)
+
+----------------------------------------------------------------
+
 ================================================================
 
 1: cd backend
 2: .venv\Scripts\activate
 3: cd ../desktop
 4: pyinstaller backend.spec --clean      ( generates server file in dist folder — move into backend/dist )
-5: npm run dist                          ( generates the installer file for Insapi Marketing ) ( must test on Windows )
+5: npm run dist:win                     ( generates the installer file for Insapi Marketing ) ( must test on Windows )
 
 
 

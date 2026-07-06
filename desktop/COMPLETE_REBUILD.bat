@@ -76,7 +76,7 @@ echo.
 echo [7/7] Building Windows installer...
 echo     This may take 3-5 minutes...
 echo.
-call yarn build:win
+npm run dist:win
 if errorlevel 1 (
     echo     ERROR: Installer build failed!
     pause
@@ -90,7 +90,7 @@ echo BUILD COMPLETE!
 echo ========================================
 echo.
 echo Installer location:
-echo   dist\Insapi-Marketing-Workspace-Setup-1.0.0.exe
+echo   dist\Insapi-Marketing-Setup-1.0.0.exe
 echo.
 echo What was built:
 echo   - Backend: Standalone .exe with ALL dependencies

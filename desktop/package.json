@@ -8,10 +8,12 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "build:frontend": "cd ../frontend && yarn build && xcopy build ..\\desktop\\web /E /I /Y",
+    "build:frontend:win": "cd ../frontend && npm run build && xcopy /E /I /Y build ..\\desktop\\web",
+    "build:frontend:mac": "cd ../frontend && npm run build && cp -r build ../desktop/web",
     "build:win": "electron-builder --win --x64",
     "build:portable": "electron-builder --win portable --x64",
-    "dist": "yarn build:frontend && yarn build:win"
+    "dist:win": "npm run build:frontend:win && npm run build:win",
+    "dist:mac": "npm run build:frontend:mac && npm run build:win"
   },
   "devDependencies": {
     "electron": "^31.0.0",
@@ -54,10 +56,7 @@
       "publisherName": "Insapi Marketing",
       "verifyUpdateCodeSignature": false,
       "requestedExecutionLevel": "asInvoker",
-      "signAndEditExecutable": true,
-      "legalTrademarks": "Copyright 2026 Insapi Marketing. All rights reserved.",
-      "fileDescription": "Insapi Marketing Workspace",
-      "productVersion": "1.0.0"
+      "legalTrademarks": "Copyright 2026 Insapi Marketing. All rights reserved."
     },
     "nsis": {
       "oneClick": false,

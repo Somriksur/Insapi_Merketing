@@ -37,7 +37,8 @@ googleapis-common-protos==1.75.0
 grpcio==1.80.0
 grpcio-status==1.80.0
 h11==0.16.0
-hf-xet==1.5.0
+# hf-xet removed (Rust dependency, fails on Windows without Rust toolchain)
+
 httpcore==1.0.9
 httplib2==0.31.2
 httpx==0.28.1
@@ -49,10 +50,12 @@ isort==8.0.1
 Jinja2==3.1.6
 jiter==0.14.0
 jmespath==1.1.0
-jq==1.11.0
+# jq removed (requires native jq binary on Windows — not auto-installed)
+
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
-librt==0.10.0
+# librt removed (Linux-only POSIX real-time library — no Windows wheel)
+
 litellm==1.80.0
 markdown-it-py==4.1.0
 MarkupSafe==3.0.3
@@ -103,7 +106,8 @@ rich==15.0.0
 rpds-py==0.30.0
 rsa==4.9.1
 s3transfer==0.17.0
-s5cmd==0.2.0
+# s5cmd removed (Linux/Mac AWS S3 CLI — no Windows pip wheel, not used in backend)
+
 shellingham==1.5.4
 six==1.17.0
 sniffio==1.3.1
